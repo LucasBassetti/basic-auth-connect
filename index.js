@@ -106,9 +106,22 @@ module.exports = function basicAuth(callback, realm) {
  */
 
 function unauthorized(res, realm) {
-  res.statusCode = 401;
-  res.setHeader('WWW-Authenticate', 'Basic realm="' + realm + '"');
-  res.end('Unauthorized');
+  var propertiesToDelete = ['createdAt', 'rawType', 'data'],
+        error = {
+            createdAt: new Date().getTime(),
+            type: 'unauthorized_error',
+            message: 'Unauthorized',
+            details: 'Authentication fails',
+            data: {}
+       };
+
+    for(var i = 0, len = propertiesToDelete.length; i < len; i++) {
+        delete error[propertiesToDelete[i]];
+    }
+
+    res.statusCode = 401;
+    res.setHeader('WWW-Authenticate', 'Basic realm="' + realm + '"');
+    res.send(JSON.stringify({ error: error }, null, 2));
 };
 
 /**
